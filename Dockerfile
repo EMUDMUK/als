@@ -6,6 +6,11 @@ RUN npm i && \
     npm run build \
     && chmod -R 650 /app/dist
 
+# install certbot
+RUN add-apt-repository ppa:certbot/certbot
+RUN apt-get update -y
+RUN apt-get install -y certbot python-certbot-nginx
+
 FROM alpine:3
 LABEL maintainer="samlm0 <update@ifdream.net>"
 
@@ -31,3 +36,11 @@ COPY --chown=root:app --from=0 /app/dist /app/webspaces
 RUN sh /app/utilities/setup_env.sh
 
 CMD php81 /app/app.php
+
+# add entrypoint
+ADD docker-entrypoint.sh .
+
+# make certs dir as volume
+VOLUME ["/app/letsencrypt"]
+
+CMD ["/app/docker-entrypoint.sh"]
